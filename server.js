@@ -9,7 +9,8 @@ app.use(bodyParser.json());
 
 connectDB()
 
-// Connect to MongoDB
+const userRoute = require("./src/api/users/user.routes");
+app.use("/api/users", userRoute)
 
 
 

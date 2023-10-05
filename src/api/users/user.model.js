@@ -1,5 +1,8 @@
 // Create a user schema
 const mongoose = require('mongoose');
+const validate = require('validator');
+const { isEmail } = validate;
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -10,18 +13,29 @@ const userSchema = new mongoose.Schema({
     email: {
       type: String,
       unique: true,
-      required: true
+      required: 'Email address is required',
+      validate: [isEmail, 'invalid email'],
     },
     password:{
         type: String,
         required: true,
-        min: 8
+        minlength: 8,
 },
   role:{
     type: String,
     enum: ['admin','visitor','host'],
-    default:'visitor'
+    default:'visitor',
   }
+});
+
+userSchema.pre('save', async function (next) {
+  //check if password is modified or not
+  if(!this.isModified('password')) {
+     next();
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 
